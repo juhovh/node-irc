@@ -3,6 +3,7 @@ var test = require('tape');
 var testHelpers = require('./helpers');
 var checks = testHelpers.getFixtures('convert-encoding');
 var bindTo = { opt: { encoding: 'utf-8' } };
+var bindToFallback = { opt: { encoding: 'utf-8', fallbackEncoding: 'latin1' } };
 
 test('irc.Client.convertEncoding old', function(assert) {
     var convertEncoding = function(str) {
@@ -49,5 +50,15 @@ test('irc.Client.convertEncoding', function(assert) {
         assert.equal(causedException, false, line + ' didn\'t cause exception');
     });
 
+    assert.end();
+});
+
+test('irc.Client.convertEncoding fallback', function(assert) {
+    var convertEncoding = irc.Client.prototype.convertEncoding.bind(bindToFallback);
+
+    var latin1 = new Buffer('6d79f668e6', 'hex');
+    var utf8 = new Buffer('myöhä');
+
+    assert.equal(convertEncoding(latin1), convertEncoding(utf8), 'latin1 and utf8 strings were not equal');
     assert.end();
 });
